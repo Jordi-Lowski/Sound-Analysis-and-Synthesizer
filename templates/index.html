@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequency Data</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ time }}" />
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+</head>
+
+<body data-guitar-type="{{ guitar_type }}">
+  <h1 id="header">Frequency Analysis Results</h1>
+  <a href="{{ url_for('home') }}" class="home-button">Home</a>
+  {% if guitar_type == 'Acoustic' or guitar_type == 'Western' %}
+  <form method="POST" action="{{ url_for(guitar_type|lower ~ '_page') }}">
+    <select name="search" id="search-dropdown"></select>
+    <button type="submit">Search</button>
+  </form>
+  {% endif %}
+  <table>
+    <thead>
+      <tr>
+        <th>File Name</th>
+        <th>Note Name</th>
+        <th>Fundamental Frequency (Hz)</th>
+        <th>Theoretical Frequency (Hz)</th>
+        <th>Mean Deviation (%)</th>
+        <th>FFT Plot</th>
+        <th>Comparison Plot</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for file_name, note, fundamental_frequency, theoretical_frequency, mean_deviation_percent,
+      fft_plot, comparison_plot in data %}
+      <tr>
+        <td>{{ file_name }}</td>
+        <td>{{ note }}</td>
+        <td>{{ fundamental_frequency }}</td>
+        <td>{{ theoretical_frequency }}</td>
+        <td>{{ mean_deviation_percent }}</td>
+
+
+        <td>
+          <div class="chart-thumbnail" onclick="openModal('{{ file_name }}', 'fft')">
+            <img src="{{ url_for('get_fft_plot', file_name=file_name) }}" alt="FFT Plot" />
+          </div>
+        </td>
+
+        <td>
+          <div class="chart-thumbnail" onclick="openModal('{{ file_name }}', 'comparison')">
+            <img src="{{ url_for('get_comparison_plot', file_name=file_name) }}" alt="Comparison Plot" />
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7<td colspan=" 7">No results found.</td>">No results found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="modal" class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-content">
+      <div class="plot-container">
+        <img id="modal-img" src="" alt="Modal Image" />
+        <img id="comparison-img" src="" alt="Comparison Image" style="display: none;" />
+      </div>
+      <div class="modal-buttons">
+        <button id="download-btn" onclick="downloadDiagram()">Download Diagram</button>
+        <button id="compare-btn" onclick="openComparisonDropdown()">Compare</button>
+      </div>
+      <div id="comparison-dropdown" style="display: none;">
+        <select id="note-select">
+        </select>
+        <button onclick="loadComparisonPlot()">Load Comparison</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Jordi Lowski. All rights reserved.</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}?v={{ time }}"></script>
+</body>
+
+</html>
